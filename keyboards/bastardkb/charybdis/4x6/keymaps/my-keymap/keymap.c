@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include QMK_KEYBOARD_H
+#include "bk_pointing_device.h"
 
 #ifdef CHARYBDIS_AUTO_POINTER_LAYER_TRIGGER_ENABLE
 #    include "timer.h"
@@ -76,9 +77,12 @@ static uint16_t auto_pointer_layer_timer = 0;
 #define S_SLSH S(KC_SLSH)
 #define S_EQL S(KC_EQL)
 #define WWWR KC_WWW_REFRESH
-#define MS_1 KC_MS_BTN1
-#define MS_2 KC_MS_BTN2
-#define MS_3 KC_MS_BTN3
+#define MS_1 QK_MOUSE_BUTTON_1
+#define MS_2 QK_MOUSE_BUTTON_2
+#define MS_3 QK_MOUSE_BUTTON_3
+#define RGB_TOG_ QK_RGB_MATRIX_TOGGLE
+#define RGB_SAD_ QK_RGB_MATRIX_HUE_DOWN
+#define RGB_SAI_ QK_RGB_MATRIX_HUE_UP
 
 #ifndef POINTING_DEVICE_ENABLE
 #    define DRGSCRL KC_NO
@@ -138,7 +142,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   // ╭──────────────────────────────────────────────────────╮ ╭──────────────────────────────────────────────────────╮
         KC_ESC, KC_MUTE, KC_VOLD, KC_VOLU, KC_BRID, KC_BRIU,    KC_MPRV, KC_MPLY, KC_MNXT, KC_BRIU, KC_BRID,  WWWR,
   // ├──────────────────────────────────────────────────────┤ ├──────────────────────────────────────────────────────┤
-        _______, _______, RGB_TOG, RGB_SAD, DPI_RMOD, S_D_RMOD, S_D_MOD, DPI_MOD, RGB_SAI, RGB_TOG, KC_VOLD, KC_VOLU,
+        _______, _______, RGB_TOG_, RGB_SAD_, DPI_RMOD, S_D_RMOD, S_D_MOD, DPI_MOD, RGB_SAI_, RGB_TOG_, KC_VOLD, KC_VOLU,
   // ├──────────────────────────────────────────────────────┤ ├──────────────────────────────────────────────────────┤
         _______, KC_LGUI, KC_LALT, KC_LCTL, KC_LSFT, MS_3,      MS_3,   KC_RSFT, KC_RCTL, KC_RALT, KC_RGUI, _______,
   // ├──────────────────────────────────────────────────────┤ ├──────────────────────────────────────────────────────┤
@@ -151,7 +155,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [LAYER_NUMPAD] = LAYOUT(
   // ╭──────────────────────────────────────────────────────╮ ╭──────────────────────────────────────────────────────╮
-       _______, KC_NLCK,    KC_P7, KC_P8,   KC_P9, KC_PSLS,     _______, _______, _______, _______, _______, _______,
+       _______, KC_NUM,     KC_P7, KC_P8,   KC_P9, KC_PSLS,     _______, _______, _______, _______, _______, _______,
   // ├──────────────────────────────────────────────────────┤ ├──────────────────────────────────────────────────────┤
        _______, _______,    KC_P4, KC_P5,   KC_P6, KC_PAST,     _______, _______, _______, _______, _______, _______,
   // ├──────────────────────────────────────────────────────┤ ├──────────────────────────────────────────────────────┤
@@ -167,7 +171,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // clang-format on
 
 report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
-    if (!charybdis_get_pointer_sniping_enabled()) {
+    if (!bkpd_get_pointer_sniping_enabled()) {
         int8_t deadzone = 2;
 
         if (mouse_report.x > -deadzone && mouse_report.x < deadzone) {
