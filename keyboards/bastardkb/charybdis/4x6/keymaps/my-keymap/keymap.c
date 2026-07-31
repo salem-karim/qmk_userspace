@@ -170,17 +170,29 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 // clang-format on
 
+static int16_t smooth_x = 0;
+static int16_t smooth_y = 0;
+
 report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
-    if (!bkpd_get_pointer_sniping_enabled()) {
-        int8_t deadzone = 2;
+    if (!bkpd_get_pointer_sniping_enabled() && !layer_state_is(LAYER_POINTER)) {
+        int16_t abs_x = mouse_report.x < 0 ? -mouse_report.x : mouse_report.x;
+        int16_t abs_y = mouse_report.y < 0 ? -mouse_report.y : mouse_report.y;
 
-        if (mouse_report.x > -deadzone && mouse_report.x < deadzone) {
-            mouse_report.x = 0;
+        int16_t factor = 2;
+
+        // Stronger smoothing for tiny movements
+        if (abs_x <= 2 && abs_y <= 2) {
+            factor = 4;
         }
 
-        if (mouse_report.y > -deadzone && mouse_report.y < deadzone) {
-            mouse_report.y = 0;
-        }
+        smooth_x = (smooth_x * factor + mouse_report.x) / (factor + 1);
+        smooth_y = (smooth_y * factor + mouse_report.y) / (factor + 1);
+
+        mouse_report.x = smooth_x;
+        mouse_report.y = smooth_y;
+    } else {
+        smooth_x = 0;
+        smooth_y = 0;
     }
 
     return mouse_report;
